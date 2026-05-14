@@ -3,7 +3,12 @@
 import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
-import type { AltinItem, MarketResponse } from "@/app/api/market/route";
+import type { AltinItem } from "@/types/market";
+import { ALTIN_ISIMLER, parseYon } from "@/types/market";
+
+// ─── Sabitler ────────────────────────────────────────────────────────
+const ALTIN_URL = "https://api.genelpara.com/json/?list=altin&sembol=GA,C,GAG,Y,T,CMR,ATA,22";
+const REFRESH_INTERVAL = 300_000; // 5 dakika
 
 const SEMBOL_SIRASI = ["GA", "C", "Y", "T", "CMR", "ATA", "22", "GAG"];
 
@@ -21,6 +26,32 @@ const SEMBOL_ICON: Record<string, string> = {
   GAG: "Ag",
 };
 
+// ─── Client-side veri çekme ───────────────────────────────────────────
+async function fetchAltinData(): Promise<Record<string, AltinItem> | null> {
+  try {
+    const res = await fetch(ALTIN_URL);
+    if (!res.ok) return null;
+    const wrapper = await res.json() as Record<string, unknown>;
+    const raw = (wrapper.data ?? wrapper) as Record<string, Record<string, unknown>>;
+    const altin: Record<string, AltinItem> = {};
+    for (const [sembol, val] of Object.entries(raw)) {
+      if (typeof val !== "object" || val === null) continue;
+      altin[sembol] = {
+        adi:     ALTIN_ISIMLER[sembol] ?? sembol,
+        alis:    String(val.alis ?? "—"),
+        satis:   String(val.satis ?? "—"),
+        degisim: String(val.degisim ?? "0"),
+        oran:    String(val.oran ?? "0"),
+        yon:     parseYon(val.yon),
+      };
+    }
+    return altin;
+  } catch {
+    return null;
+  }
+}
+
+// ─── Skeleton ────────────────────────────────────────────────────────
 function SkeletonRow() {
   return (
     <div className="flex items-center gap-4 px-5 py-3 animate-pulse">
@@ -35,6 +66,7 @@ function SkeletonRow() {
   );
 }
 
+// ─── Satır bileşeni ───────────────────────────────────────────────────
 function GoldRow({
   sembol,
   item,
@@ -99,6 +131,7 @@ function GoldRow({
   );
 }
 
+// ─── Ana bileşen ──────────────────────────────────────────────────────
 export default function GoldMarketGrid() {
   const [altin, setAltin] = useState<Record<string, AltinItem> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -111,17 +144,29 @@ export default function GoldMarketGrid() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetch("/api/market")
-      .then((r) => {
-        if (!r.ok) throw new Error("fetch failed");
-        return r.json() as Promise<MarketResponse>;
-      })
-      .then((json) => {
-        if (json.altin) setAltin(json.altin);
-        else setError(true);
-      })
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
+    let cancelled = false;
+
+    const load = async () => {
+      const data = await fetchAltinData();
+      if (cancelled) return;
+      if (data) {
+        setAltin(data);
+        setError(false);
+      } else {
+        setError(true);
+      }
+      setLoading(false);
+    };
+
+    load();
+
+    // 5 dakikada bir yenile
+    const interval = setInterval(load, REFRESH_INTERVAL);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, []);
 
   const handleRowClick = (s: string) => {
@@ -148,8 +193,6 @@ export default function GoldMarketGrid() {
   const fromLabel = direction === "TRY_TO_ALTIN" ? "₺" : (selectedItem?.adi ?? "");
   const toLabel = direction === "TRY_TO_ALTIN" ? (selectedItem?.adi ?? "") : "₺";
 
-  if (error) return null;
-
   return (
     <motion.div
       className="max-w-7xl mx-auto mb-6"
@@ -170,102 +213,106 @@ export default function GoldMarketGrid() {
           border: "1px solid rgba(255,255,255,0.08)",
         }}
       >
-        {/* Satır listesi */}
         <div className="divide-y divide-white/[0.06]">
-          {loading
-            ? Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)
-            : altin
-            ? SEMBOL_SIRASI.filter((s) => altin[s]).map((s) => (
-                <React.Fragment key={s}>
-                  <GoldRow
-                    sembol={s}
-                    item={altin[s]}
-                    isSelected={selectedSembol === s}
-                    onClick={() => handleRowClick(s)}
-                  />
+          {loading ? (
+            Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)
+          ) : error ? (
+            <div className="px-5 py-8 text-center">
+              <p className="text-sm text-onionwhite/40">Piyasa verileri şu an alınamıyor</p>
+              <p className="text-xs text-onionwhite/25 mt-1">Lütfen daha sonra tekrar deneyin</p>
+            </div>
+          ) : altin ? (
+            SEMBOL_SIRASI.filter((s) => altin[s]).map((s) => (
+              <React.Fragment key={s}>
+                <GoldRow
+                  sembol={s}
+                  item={altin[s]}
+                  isSelected={selectedSembol === s}
+                  onClick={() => handleRowClick(s)}
+                />
 
-                  {/* İnline dönüştürücü */}
-                  <AnimatePresence>
-                    {selectedSembol === s && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.22, ease: "easeInOut" }}
-                        style={{ overflow: "hidden" }}
+                {/* İnline dönüştürücü */}
+                <AnimatePresence>
+                  {selectedSembol === s && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.22, ease: "easeInOut" }}
+                      style={{ overflow: "hidden" }}
+                    >
+                      <div
+                        className="px-5 py-4 space-y-3"
+                        style={{ background: "rgba(244,163,132,0.04)", borderTop: "1px solid rgba(244,163,132,0.1)" }}
                       >
-                        <div
-                          className="px-5 py-4 space-y-3"
-                          style={{ background: "rgba(244,163,132,0.04)", borderTop: "1px solid rgba(244,163,132,0.1)" }}
-                        >
-                          <div className="flex flex-wrap items-center gap-3">
-                            {/* Miktar */}
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs text-onionwhite/40 whitespace-nowrap">{fromLabel}</span>
-                              <input
-                                ref={inputRef}
-                                type="number"
-                                value={amount}
-                                onChange={(e) => setAmount(e.target.value)}
-                                className="glass-input w-28 px-3 py-1.5 text-sm font-semibold text-babyblossom"
-                                placeholder="Miktar"
-                              />
-                            </div>
-
-                            {/* Yön swap */}
-                            <button
-                              onClick={() =>
-                                setDirection((d) =>
-                                  d === "TRY_TO_ALTIN" ? "ALTIN_TO_TRY" : "TRY_TO_ALTIN"
-                                )
-                              }
-                              className="p-2 rounded-lg transition-colors hover:bg-white/10"
-                            >
-                              <ArrowsRightLeftIcon className="w-4 h-4 text-onionwhite/50" />
-                            </button>
-
-                            {/* Alış / Satış */}
-                            <div className="flex gap-1.5">
-                              {([
-                                { key: "satis" as RateType, label: "Satış" },
-                                { key: "alis" as RateType, label: "Alış" },
-                              ]).map(({ key, label }) => (
-                                <button
-                                  key={key}
-                                  onClick={() => setRateType(key)}
-                                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                                  style={
-                                    rateType === key
-                                      ? { background: "rgba(244,163,132,0.2)", color: "#F4A384", border: "1px solid rgba(244,163,132,0.3)" }
-                                      : { background: "rgba(255,255,255,0.05)", color: "#E2D5C2", border: "1px solid rgba(255,255,255,0.08)" }
-                                  }
-                                >
-                                  {label}
-                                </button>
-                              ))}
-                            </div>
+                        <div className="flex flex-wrap items-center gap-3">
+                          {/* Miktar */}
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-onionwhite/40 whitespace-nowrap">{fromLabel}</span>
+                            <input
+                              ref={inputRef}
+                              type="number"
+                              value={amount}
+                              onChange={(e) => setAmount(e.target.value)}
+                              className="glass-input w-28 px-3 py-1.5 text-sm font-semibold text-babyblossom"
+                              placeholder="Miktar"
+                            />
                           </div>
 
-                          {/* Sonuç */}
-                          <div className="flex items-baseline gap-2 flex-wrap">
-                            <span className="text-xs text-onionwhite/35">
-                              {amount || "—"} {fromLabel} =
-                            </span>
-                            <span className="text-xl font-bold text-babyblossom">{getResult()}</span>
-                            <span className="text-xs text-onionwhite/35">{toLabel}</span>
-                            {selectedItem && (
-                              <span className="text-xs text-onionwhite/25 ml-auto">
-                                Kur: {selectedItem[rateType]} ₺
-                              </span>
-                            )}
+                          {/* Yön swap */}
+                          <button
+                            onClick={() =>
+                              setDirection((d) =>
+                                d === "TRY_TO_ALTIN" ? "ALTIN_TO_TRY" : "TRY_TO_ALTIN"
+                              )
+                            }
+                            className="p-2 rounded-lg transition-colors hover:bg-white/10"
+                          >
+                            <ArrowsRightLeftIcon className="w-4 h-4 text-onionwhite/50" />
+                          </button>
+
+                          {/* Alış / Satış */}
+                          <div className="flex gap-1.5">
+                            {([
+                              { key: "satis" as RateType, label: "Satış" },
+                              { key: "alis" as RateType, label: "Alış" },
+                            ]).map(({ key, label }) => (
+                              <button
+                                key={key}
+                                onClick={() => setRateType(key)}
+                                className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                                style={
+                                  rateType === key
+                                    ? { background: "rgba(244,163,132,0.2)", color: "#F4A384", border: "1px solid rgba(244,163,132,0.3)" }
+                                    : { background: "rgba(255,255,255,0.05)", color: "#E2D5C2", border: "1px solid rgba(255,255,255,0.08)" }
+                                }
+                              >
+                                {label}
+                              </button>
+                            ))}
                           </div>
                         </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </React.Fragment>
-              ))
-            : null}
+
+                        {/* Sonuç */}
+                        <div className="flex items-baseline gap-2 flex-wrap">
+                          <span className="text-xs text-onionwhite/35">
+                            {amount || "—"} {fromLabel} =
+                          </span>
+                          <span className="text-xl font-bold text-babyblossom">{getResult()}</span>
+                          <span className="text-xs text-onionwhite/35">{toLabel}</span>
+                          {selectedItem && (
+                            <span className="text-xs text-onionwhite/25 ml-auto">
+                              Kur: {selectedItem[rateType]} ₺
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </React.Fragment>
+            ))
+          ) : null}
         </div>
       </div>
     </motion.div>

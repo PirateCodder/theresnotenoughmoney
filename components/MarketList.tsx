@@ -3,9 +3,14 @@
 import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
-import type { DovizItem, AltinItem, MarketResponse } from "@/app/api/market/route";
+import type { DovizItem, AltinItem } from "@/types/market";
+import { ALTIN_ISIMLER, parseYon } from "@/types/market";
 
 // ─── Sabitler ────────────────────────────────────────────────────────
+const DOVIZ_URL = "https://api.genelpara.com/json/?list=doviz&sembol=USD,EUR,GBP,CHF,RUB";
+const ALTIN_URL = "https://api.genelpara.com/json/?list=altin&sembol=GA,C,GAG,Y,T,CMR,ATA,22";
+const REFRESH_INTERVAL = 300_000; // 5 dakika
+
 const DOVIZ_SIRASI = ["USD", "EUR", "GBP", "CHF", "RUB"];
 const ALTIN_SIRASI = ["GA", "C", "Y", "T", "CMR", "ATA", "22", "GAG"];
 
@@ -30,7 +35,64 @@ const ALTIN_META: Record<string, { label: string; icon: string }> = {
 
 const GOLD_COLOR = "#D4AA60";
 
-// ─── Yardımcılar ─────────────────────────────────────────────────────
+// ─── Client-side veri çekme yardımcısı ────────────────────────────────
+async function fetchMarketData(): Promise<{
+  doviz: Record<string, DovizItem> | null;
+  altin: Record<string, AltinItem> | null;
+}> {
+  const [dovizRes, altinRes] = await Promise.allSettled([
+    fetch(DOVIZ_URL),
+    fetch(ALTIN_URL),
+  ]);
+
+  // Döviz parse
+  let doviz: Record<string, DovizItem> | null = null;
+  try {
+    if (dovizRes.status === "fulfilled" && dovizRes.value.ok) {
+      const wrapper = await dovizRes.value.json() as Record<string, unknown>;
+      const raw = (wrapper.data ?? wrapper) as Record<string, Record<string, unknown>>;
+      doviz = {};
+      for (const [kod, val] of Object.entries(raw)) {
+        if (typeof val !== "object" || val === null) continue;
+        doviz[kod] = {
+          alis:    String(val.alis ?? "—"),
+          satis:   String(val.satis ?? "—"),
+          degisim: String(val.degisim ?? "0"),
+          yon:     parseYon(val.yon),
+        };
+      }
+    }
+  } catch {
+    doviz = null;
+  }
+
+  // Altın parse
+  let altin: Record<string, AltinItem> | null = null;
+  try {
+    if (altinRes.status === "fulfilled" && altinRes.value.ok) {
+      const wrapper = await altinRes.value.json() as Record<string, unknown>;
+      const raw = (wrapper.data ?? wrapper) as Record<string, Record<string, unknown>>;
+      altin = {};
+      for (const [sembol, val] of Object.entries(raw)) {
+        if (typeof val !== "object" || val === null) continue;
+        altin[sembol] = {
+          adi:     ALTIN_ISIMLER[sembol] ?? sembol,
+          alis:    String(val.alis ?? "—"),
+          satis:   String(val.satis ?? "—"),
+          degisim: String(val.degisim ?? "0"),
+          oran:    String(val.oran ?? "0"),
+          yon:     parseYon(val.yon),
+        };
+      }
+    }
+  } catch {
+    altin = null;
+  }
+
+  return { doviz, altin };
+}
+
+// ─── Yardımcı bileşenler ─────────────────────────────────────────────
 function DegisimBadge({ degisim, yon }: { degisim: string; yon: "moneyUp" | "moneyDown" | "neutral" }) {
   const isUp = yon === "moneyUp";
   const isDown = yon === "moneyDown";
@@ -46,7 +108,6 @@ function DegisimBadge({ degisim, yon }: { degisim: string; yon: "moneyUp" | "mon
   );
 }
 
-// ─── Swap butonu ──────────────────────────────────────────────────────
 function SwapButton({ onSwap }: { onSwap: () => void }) {
   return (
     <button
@@ -199,19 +260,38 @@ export default function MarketList() {
   const [doviz, setDoviz] = useState<Record<string, DovizItem> | null>(null);
   const [altin, setAltin] = useState<Record<string, AltinItem> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetch("/api/market")
-      .then((r) => r.ok ? r.json() as Promise<MarketResponse> : Promise.reject())
-      .then((json) => {
-        if (json.doviz) setDoviz(json.doviz);
-        if (json.altin) setAltin(json.altin);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const data = await fetchMarketData();
+        if (cancelled) return;
+        if (data.doviz) setDoviz(data.doviz);
+        if (data.altin) setAltin(data.altin);
+        // Hiçbir veri gelmediyse hata göster
+        if (!data.doviz && !data.altin) setError(true);
+      } catch {
+        if (!cancelled) setError(true);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    load();
+
+    // 5 dakikada bir yenile
+    const interval = setInterval(load, REFRESH_INTERVAL);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, []);
 
   const handleClick = (id: string) => {
@@ -219,8 +299,14 @@ export default function MarketList() {
     setTimeout(() => inputRef.current?.focus(), 200);
   };
 
-  const renderRow = (id: string, meta: { label: string; sublabel: string; icon: string; accentColor: string },
-    alisFiyat: string, satisFiyat: string, degisim: string, yon: "moneyUp" | "moneyDown" | "neutral") => (
+  const renderRow = (
+    id: string,
+    meta: { label: string; sublabel: string; icon: string; accentColor: string },
+    alisFiyat: string,
+    satisFiyat: string,
+    degisim: string,
+    yon: "moneyUp" | "moneyDown" | "neutral"
+  ) => (
     <React.Fragment key={id}>
       <MarketRow
         id={id} label={meta.label} sublabel={meta.sublabel} icon={meta.icon}
@@ -256,13 +342,17 @@ export default function MarketList() {
         <div className="divide-y divide-white/[0.06]">
           {loading ? (
             Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)
+          ) : error ? (
+            <div className="px-5 py-8 text-center">
+              <p className="text-sm text-onionwhite/40">Piyasa verileri şu an alınamıyor</p>
+              <p className="text-xs text-onionwhite/25 mt-1">Lütfen daha sonra tekrar deneyin</p>
+            </div>
           ) : (
             <>
               {/* Döviz satırları */}
               {doviz && DOVIZ_SIRASI.filter((k) => doviz[k]).map((kod) => {
                 const meta = DOVIZ_META[kod];
                 const item = doviz[kod];
-                // Döviz: kullanıcı alış = bankanın satış, kullanıcı satış = bankanın alış
                 return renderRow(kod, meta, item.satis, item.alis, item.degisim, item.yon);
               })}
 
@@ -270,7 +360,6 @@ export default function MarketList() {
               {altin && ALTIN_SIRASI.filter((k) => altin[k]).map((sembol) => {
                 const meta = { ...ALTIN_META[sembol] ?? { label: sembol, icon: sembol }, sublabel: sembol, accentColor: GOLD_COLOR };
                 const item = altin[sembol];
-                // Altın: kullanıcı alış = bankanın satış, kullanıcı satış = bankanın alış
                 return renderRow(sembol, meta, item.satis, item.alis, item.degisim, item.yon);
               })}
             </>
