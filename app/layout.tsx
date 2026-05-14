@@ -1,9 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { MarketProvider } from "@/context/MarketContext";
 
 export const metadata: Metadata = {
-  title: "Kredi Hesaplama | Ödeme Simülasyonu",
-  description: "Anlık kredi hesaplama, aylık taksit ve ödeme planı simülasyonu",
+  title: "Finans Kedisi | Akıllı Finans Portalı",
+  description: "Döviz kurları, altın fiyatları, kripto para piyasası, emtia ve kredi simülasyonu — tek ekranda.",
+  icons: {
+    icon: "/logo.webp",
+    apple: "/logo big.webp",
+  },
 };
 
 export const viewport: Viewport = {
@@ -27,7 +32,11 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="antialiased min-h-screen">{children}</body>
+      <body className="antialiased min-h-screen">
+        <MarketProvider>
+          {children}
+        </MarketProvider>
+      </body>
     </html>
   );
 }

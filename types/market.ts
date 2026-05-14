@@ -1,5 +1,4 @@
 // ── Piyasa Veri Tipleri ──────────────────────────────────────────────
-// Bu tipler sunucu rotası yerine doğrudan client-side fetch için kullanılır
 
 export interface DovizItem {
   alis: string;
@@ -17,20 +16,36 @@ export interface AltinItem {
   yon: "moneyUp" | "moneyDown" | "neutral";
 }
 
+export interface KriptoItem {
+  adi: string;
+  satis: string;
+  degisim: string;
+  yon: "moneyUp" | "moneyDown" | "neutral";
+}
+
+export interface EmtiaItem {
+  adi: string;
+  satis: string;
+  degisim: string;
+  yon: "moneyUp" | "moneyDown" | "neutral";
+}
+
 export interface MarketResponse {
   doviz: Record<string, DovizItem> | null;
   altin: Record<string, AltinItem> | null;
+  kripto: Record<string, KriptoItem> | null;
+  emtia: Record<string, EmtiaItem> | null;
 }
 
 // Altın sembol → okunabilir isim
 export const ALTIN_ISIMLER: Record<string, string> = {
-  GA:  "Gram Altın",
-  C:   "Çeyrek Altın",
-  GAG: "Gram Gümüş",
-  Y:   "Yarım Altın",
-  T:   "Tam Altın",
-  CMR: "Cumhuriyet Altını",
-  ATA: "Ata Altın",
+  GA:   "Gram Altın",
+  C:    "Çeyrek Altın",
+  GAG:  "Gram Gümüş",
+  Y:    "Yarım Altın",
+  T:    "Tam Altın",
+  CMR:  "Cumhuriyet Altını",
+  ATA:  "Ata Altın",
   "22": "22 Ayar Bilezik",
 };
 
