@@ -204,15 +204,7 @@ export default function GoldMarketGrid() {
         Altın &amp; Kıymetli Madenler
       </p>
 
-      <div
-        className="rounded-2xl overflow-hidden"
-        style={{
-          background: "rgba(255,255,255,0.04)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          border: "1px solid rgba(255,255,255,0.08)",
-        }}
-      >
+      <div className="glass-card overflow-hidden" style={{ borderRadius: "20px" }}>
         <div className="divide-y divide-white/[0.06]">
           {loading ? (
             Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)
