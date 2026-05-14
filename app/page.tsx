@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import CreditForm from "@/components/CreditForm";
 import ResultCards from "@/components/ResultCards";
 import PdfExport from "@/components/PdfExport";
+import MarketList from "@/components/MarketList";
 import { calculateAmortization } from "@/lib/creditCalculator";
 
 const DonutChart = dynamic(() => import("@/components/DonutChart"), { ssr: false });
@@ -41,10 +42,10 @@ export default function Home() {
             &amp; Ödeme Simülasyonu
           </span>
         </h1>
-        <p className="text-onionwhite/45 text-sm max-w-sm mx-auto">
-          Taksit hesabı yapın, ödeme planınızı görüntüleyin ve PDF indirin.
-        </p>
       </motion.div>
+
+      {/* ── Piyasa Listesi ── */}
+      <MarketList />
 
       {/* ── Main Grid ── */}
       <div className="max-w-7xl mx-auto">

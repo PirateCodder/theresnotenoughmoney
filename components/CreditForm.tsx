@@ -17,7 +17,7 @@ interface CreditFormProps {
   setMonths: (v: number) => void;
 }
 
-const MONTH_OPTIONS = [10, 12, 24, 36, 60, 120, 180];
+const MONTH_OPTIONS = [12, 24, 60, 120];
 
 // Slider sınırları
 const SLIDER_MIN_PRINCIPAL = 0;
@@ -42,6 +42,7 @@ function SliderInput({
   displaySuffix,
   inputDecimals,
   icon,
+  showCurrencyIcon,
 }: {
   label: string;
   value: number;
@@ -52,13 +53,21 @@ function SliderInput({
   displaySuffix: string;
   inputDecimals: number;
   icon: React.ReactNode;
+  showCurrencyIcon?: boolean;
 }) {
-  const [inputVal, setInputVal] = useState(value.toFixed(inputDecimals));
+  const formatForDisplay = (v: number) =>
+    inputDecimals > 0 ? v.toFixed(inputDecimals) : v.toLocaleString("tr-TR");
 
-  // Dışarıdan value değişince (örn. slider) input'u güncelle
+  const [inputVal, setInputVal] = useState(formatForDisplay(value));
+  const [isFocused, setIsFocused] = useState(false);
+
+  // Dışarıdan value değişince (örn. slider) input'u güncelle — odak yokken
   useEffect(() => {
-    setInputVal(value.toFixed(inputDecimals));
-  }, [value, inputDecimals]);
+    if (!isFocused) {
+      setInputVal(formatForDisplay(value));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, inputDecimals, isFocused]);
 
   const percentage = Math.min(100, Math.max(0, ((value - sliderMin) / (sliderMax - sliderMin)) * 100));
 
@@ -69,27 +78,40 @@ function SliderInput({
           <span className="text-creamypeach w-4 h-4">{icon}</span>
           <span>{label}</span>
         </label>
-        <input
-          type="number"
-          value={inputVal}
-          step={step}
-          onChange={(e) => {
-            const raw = e.target.value;
-            setInputVal(raw);
-            const parsed = inputDecimals > 0 ? parseFloat(raw) : parseInt(raw);
-            if (!isNaN(parsed) && parsed >= 0) {
-              onChange(parsed);
-            }
-          }}
-          onBlur={() => {
-            // Boş veya geçersiz bırakılırsa 0'a sıfırla
-            const parsed = inputDecimals > 0 ? parseFloat(inputVal) : parseInt(inputVal);
-            const safe = isNaN(parsed) || parsed < 0 ? 0 : parsed;
-            onChange(safe);
-            setInputVal(safe.toFixed(inputDecimals));
-          }}
-          className="glass-input w-36 px-3 py-1.5 text-right text-sm font-semibold text-babyblossom"
-        />
+        <div className="relative flex items-center">
+          <input
+            type="text"
+            inputMode={inputDecimals > 0 ? "decimal" : "numeric"}
+            value={inputVal}
+            onChange={(e) => {
+              const raw = e.target.value.replace(/\./g, "").replace(",", ".");
+              setInputVal(e.target.value);
+              const parsed = inputDecimals > 0 ? parseFloat(raw) : parseInt(raw);
+              if (!isNaN(parsed) && parsed >= 0) {
+                onChange(parsed);
+              }
+            }}
+            onFocus={() => {
+              setIsFocused(true);
+              // Odaklanınca formatsız sayıyı göster
+              setInputVal(inputDecimals > 0 ? value.toFixed(inputDecimals) : String(value));
+            }}
+            onBlur={() => {
+              setIsFocused(false);
+              const raw = inputVal.replace(/\./g, "").replace(",", ".");
+              const parsed = inputDecimals > 0 ? parseFloat(raw) : parseInt(raw);
+              const safe = isNaN(parsed) || parsed < 0 ? 0 : parsed;
+              onChange(safe);
+              setInputVal(formatForDisplay(safe));
+            }}
+            className={`glass-input w-36 py-1.5 text-right text-sm font-semibold text-babyblossom ${showCurrencyIcon ? "pl-3 pr-7" : "px-3"}`}
+          />
+          {showCurrencyIcon && (
+            <span className="absolute right-2.5 text-sm font-semibold text-creamypeach pointer-events-none select-none">
+              ₺
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Slider */}
@@ -177,11 +199,12 @@ export default function CreditForm({
         value={principal}
         sliderMin={SLIDER_MIN_PRINCIPAL}
         sliderMax={SLIDER_MAX_PRINCIPAL}
-        step={5000}
+        step={10000}
         onChange={setPrincipal}
         displaySuffix=" ₺"
         inputDecimals={0}
         icon={<BanknotesIcon className="w-4 h-4" />}
+        showCurrencyIcon
       />
 
       {/* Faiz Oranı */}

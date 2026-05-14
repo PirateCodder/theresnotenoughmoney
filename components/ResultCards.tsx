@@ -2,11 +2,6 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import {
-  CurrencyDollarIcon,
-  DocumentTextIcon,
-  ArrowTrendingUpIcon,
-} from "@heroicons/react/24/outline";
 import { formatCurrency } from "@/lib/creditCalculator";
 
 interface ResultCardsProps {
@@ -35,12 +30,11 @@ interface CardProps {
   title: string;
   value: number;
   subtitle: string;
-  icon: React.ReactNode;
   accentColor: string;
   delay: number;
 }
 
-function ResultCard({ title, value, subtitle, icon, accentColor, delay }: CardProps) {
+function ResultCard({ title, value, subtitle, accentColor, delay }: CardProps) {
   return (
     <motion.div
       className="glass-card p-5 md:p-6 relative overflow-hidden"
@@ -55,25 +49,10 @@ function ResultCard({ title, value, subtitle, icon, accentColor, delay }: CardPr
       />
 
       <div className="relative z-10">
-        <div className="flex items-center justify-between mb-3">
-          <p className="flex items-center gap-2 text-xs text-onionwhite/55 font-medium">
-            <span
-              className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: `${accentColor}22`, color: accentColor }}
-            >
-              {icon}
-            </span>
+        <div className="flex items-center mb-3">
+          <p className="text-sm font-semibold text-onionwhite/85 tracking-wide">
             {title}
           </p>
-          <span
-            className="text-xs font-semibold px-2.5 py-1 rounded-full"
-            style={{
-              background: `${accentColor}18`,
-              color: accentColor,
-            }}
-          >
-            ₺
-          </span>
         </div>
 
         <div className="text-xl md:text-2xl font-bold text-babyblossom overflow-hidden">
@@ -110,7 +89,6 @@ export default function ResultCards({
           title="Aylık Taksit Tutarı"
           value={monthlyPayment}
           subtitle={`${months} ay boyunca sabit taksit`}
-          icon={<CurrencyDollarIcon className="w-5 h-5" />}
           accentColor="#F4A384"
           delay={0.1}
         />
@@ -118,7 +96,6 @@ export default function ResultCards({
           title="Toplam Geri Ödeme"
           value={totalPayment}
           subtitle="Ana para + toplam faiz"
-          icon={<DocumentTextIcon className="w-5 h-5" />}
           accentColor="#486D83"
           delay={0.2}
         />
@@ -126,7 +103,6 @@ export default function ResultCards({
           title="Toplam Ödenecek Faiz"
           value={totalInterest}
           subtitle={`Geri ödemenin %${interestRatio}'si faiz`}
-          icon={<ArrowTrendingUpIcon className="w-5 h-5" />}
           accentColor="#7A5063"
           delay={0.3}
         />
