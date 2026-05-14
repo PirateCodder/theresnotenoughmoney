@@ -310,7 +310,7 @@ export default function ChatBot({ open, onClose, pageFocus }: ChatBotProps) {
               bottom: "16px",
               left: "16px",
               right: "16px",
-              height: "min(600px, calc(100dvh - 100px))",
+              height: "min(720px, calc(100dvh - 72px))",
               background: "rgba(22,18,28,0.85)",
               backdropFilter: "blur(32px)",
               WebkitBackdropFilter: "blur(32px)",
