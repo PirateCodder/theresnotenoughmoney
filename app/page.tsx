@@ -107,15 +107,11 @@ function NavCard({ href, label, description, Icon, accent, accentBg, accentBorde
           }}
           whileTap={{ scale: 0.985 }}
         >
-          {/* Gradient overlay */}
           <div
             className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
             style={{ background: gradient }}
           />
-
-          {/* İçerik */}
           <div className="relative z-10 flex items-center gap-4 px-5 py-4">
-            {/* İkon */}
             <div
               className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
               style={{
@@ -126,34 +122,20 @@ function NavCard({ href, label, description, Icon, accent, accentBg, accentBorde
             >
               <Icon className="w-[22px] h-[22px]" style={{ color: accent }} />
             </div>
-
-            {/* Metin */}
             <div className="flex-1 min-w-0">
-              <p
-                className="font-semibold text-[15px] leading-snug tracking-tight"
-                style={{ color: "#FAEFE9", fontVariantNumeric: "tabular-nums" }}
-              >
+              <p className="font-semibold text-[15px] leading-snug tracking-tight" style={{ color: "#FAEFE9" }}>
                 {label}
               </p>
-              <p
-                className="text-[12.5px] leading-snug mt-0.5 truncate"
-                style={{ color: "rgba(226,213,194,0.48)" }}
-              >
+              <p className="text-[12.5px] leading-snug mt-0.5 truncate" style={{ color: "rgba(226,213,194,0.48)" }}>
                 {description}
               </p>
             </div>
-
-            {/* Chevron — absolute, hover'da görünür */}
-            <div
-              className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:translate-x-0.5"
-            >
+            <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:translate-x-0.5">
               <svg className="w-4 h-4" style={{ color: `${accent}99` }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </div>
           </div>
-
-          {/* Alt aksan çizgisi */}
           <div
             className="absolute bottom-0 left-5 right-5 h-px opacity-0 group-hover:opacity-60 transition-opacity duration-300"
             style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }}
@@ -177,7 +159,6 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          {/* Logo */}
           <motion.div
             className="flex justify-center mb-5"
             initial={{ opacity: 0, scale: 0.85 }}
@@ -185,14 +166,7 @@ export default function Home() {
             transition={{ delay: 0.05, duration: 0.55, ease: "easeOut" }}
           >
             <div style={{ filter: "drop-shadow(0 0 20px rgba(244,163,132,0.3))" }}>
-              <Image
-                src={logoBig}
-                alt="Finans Kedisi Logo"
-                width={108}
-                height={108}
-                priority
-                className="rounded-2xl"
-              />
+              <Image src={logoBig} alt="Finans Kedisi Logo" width={108} height={108} priority className="rounded-2xl" />
             </div>
           </motion.div>
 
@@ -203,9 +177,7 @@ export default function Home() {
             <span style={{ color: "#FAEFE9" }}>Finans </span>
             <span
               className="bg-clip-text text-transparent"
-              style={{
-                backgroundImage: "linear-gradient(135deg, #F4A384 0%, #C2606A 45%, #486D83 100%)",
-              }}
+              style={{ backgroundImage: "linear-gradient(135deg, #F4A384 0%, #C2606A 45%, #486D83 100%)" }}
             >
               Kedisi
             </span>
@@ -213,13 +185,7 @@ export default function Home() {
 
           <p
             className="mx-auto"
-            style={{
-              color: "rgba(226,213,194,0.45)",
-              fontSize: "14.5px",
-              lineHeight: "1.6",
-              maxWidth: "340px",
-              letterSpacing: "0.01em",
-            }}
+            style={{ color: "rgba(226,213,194,0.45)", fontSize: "14.5px", lineHeight: "1.6", maxWidth: "340px", letterSpacing: "0.01em" }}
           >
             Piyasa fiyatlarını görün, dönüştürün ve kredinizi hesaplayın.
           </p>
@@ -237,9 +203,109 @@ export default function Home() {
           ))}
         </motion.div>
 
+        {/* ── Yapay Zeka CTA Kartı — /chat sayfasına yönlendirir ── */}
+        <motion.div
+          className="mt-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.5, ease: "easeOut" }}
+        >
+          <Link href="/chat" className="block">
+            <motion.div
+              className="relative w-full overflow-hidden rounded-2xl cursor-pointer group"
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+                border: "1px solid rgba(244,163,132,0.3)",
+                boxShadow: "0 4px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.07)",
+              }}
+              whileHover={{
+                scale: 1.015,
+                boxShadow: "0 8px 48px rgba(194,96,106,0.25), 0 0 0 1px rgba(244,163,132,0.45), inset 0 1px 0 rgba(255,255,255,0.1)",
+                transition: { duration: 0.2, ease: "easeOut" },
+              }}
+              whileTap={{ scale: 0.985 }}
+            >
+              {/* Arka plan gradient ışıltı */}
+              <div
+                className="absolute inset-0 opacity-60 pointer-events-none"
+                style={{ background: "linear-gradient(135deg, rgba(244,163,132,0.12) 0%, rgba(168,155,194,0.12) 50%, rgba(72,109,131,0.08) 100%)" }}
+              />
+              {/* Animasyonlu ışıltı efekti */}
+              <motion.div
+                className="absolute inset-0 pointer-events-none"
+                style={{ background: "linear-gradient(90deg, transparent 0%, rgba(244,163,132,0.08) 50%, transparent 100%)" }}
+                animate={{ x: ["-100%", "200%"] }}
+                transition={{ duration: 3.5, repeat: Infinity, ease: "linear", repeatDelay: 1.5 }}
+              />
+
+              <div className="relative z-10 flex items-center gap-4 px-5 py-4">
+                {/* İkon */}
+                <div className="flex-shrink-0 relative">
+                  <div
+                    className="w-12 h-12 rounded-xl flex items-center justify-center text-xl"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(244,163,132,0.25) 0%, rgba(168,155,194,0.2) 100%)",
+                      border: "1px solid rgba(244,163,132,0.35)",
+                      boxShadow: "0 0 20px rgba(244,163,132,0.2)",
+                    }}
+                  >
+                    🤖
+                  </div>
+                  <motion.div
+                    className="absolute inset-0 rounded-xl"
+                    style={{ border: "1px solid rgba(244,163,132,0.5)" }}
+                    animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
+                    transition={{ duration: 2.5, repeat: Infinity }}
+                  />
+                </div>
+
+                {/* Metin */}
+                <div className="flex-1 min-w-0 text-left">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <p
+                      className="font-bold text-[15px] leading-snug tracking-tight bg-clip-text text-transparent"
+                      style={{ backgroundImage: "linear-gradient(90deg, #F4A384, #C2606A, #A89BC2)" }}
+                    >
+                      Yapay Zeka Asistanı
+                    </p>
+                    <span
+                      className="text-[9px] font-bold px-1.5 py-0.5 rounded-md flex-shrink-0"
+                      style={{
+                        background: "rgba(244,163,132,0.2)",
+                        border: "1px solid rgba(244,163,132,0.4)",
+                        color: "#F4A384",
+                        letterSpacing: "0.05em",
+                      }}
+                    >
+                      YENİ
+                    </span>
+                  </div>
+                  <p className="text-[12px] leading-snug" style={{ color: "rgba(226,213,194,0.45)" }}>
+                    Gemini & Claude ile piyasa analizi · Konu seç, soru sor
+                  </p>
+                </div>
+
+                {/* Sağ ok */}
+                <div className="flex-shrink-0 opacity-60 group-hover:opacity-100 transition-opacity duration-200 group-hover:translate-x-0.5">
+                  <svg className="w-4 h-4" style={{ color: "#F4A384" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+
+              <div
+                className="absolute bottom-0 left-5 right-5 h-px opacity-0 group-hover:opacity-80 transition-opacity duration-300"
+                style={{ background: "linear-gradient(90deg, transparent, #F4A384, #A89BC2, transparent)" }}
+              />
+            </motion.div>
+          </Link>
+        </motion.div>
+
         {/* ── Footer ── */}
         <motion.footer
-          className="text-center mt-12 text-xs"
+          className="text-center mt-10 text-xs"
           style={{ color: "rgba(226,213,194,0.18)", letterSpacing: "0.02em" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

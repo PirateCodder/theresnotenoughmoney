@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { BanknotesIcon, ChevronDownIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 import { useMarket } from "@/context/MarketContext";
 import PageHeader from "@/components/PageHeader";
+import FloatingChatButton from "@/components/FloatingChatButton";
 
 // ─── Sabitler ─────────────────────────────────────────────────────────
 const ALTIN_SIRA = ["GA", "C", "Y", "T", "CMR", "ATA", "22", "14", "18", "GAG", "GAS", "PLATIN", "PALADYUM"];
@@ -416,6 +417,8 @@ export default function AltinPage() {
           )}
         </motion.div>
       </div>
+
+      <FloatingChatButton pageFocus="altin" />
     </main>
   );
 }

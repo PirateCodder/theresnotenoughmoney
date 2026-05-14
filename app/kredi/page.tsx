@@ -8,6 +8,7 @@ import CreditForm from "@/components/CreditForm";
 import ResultCards from "@/components/ResultCards";
 import PdfExport from "@/components/PdfExport";
 import PageHeader from "@/components/PageHeader";
+import FloatingChatButton from "@/components/FloatingChatButton";
 import { calculateAmortization } from "@/lib/creditCalculator";
 
 const DonutChart = dynamic(() => import("@/components/DonutChart"), { ssr: false });
@@ -110,6 +111,8 @@ export default function KrediPage() {
           <p>Bu uygulama bilgi amaçlıdır. Hesaplamalar aylık eşit taksit (anapara + faiz) yöntemine göredir.</p>
         </motion.footer>
       </div>
+
+      <FloatingChatButton pageFocus="kredi" />
     </main>
   );
 }

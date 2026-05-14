@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CpuChipIcon, ChevronDownIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 import { useMarket } from "@/context/MarketContext";
 import PageHeader from "@/components/PageHeader";
+import FloatingChatButton from "@/components/FloatingChatButton";
 
 // ─── Sayı formatlama (Türkçe: 1.234,56) ─────────────────────────────
 function fmtNum(val: string | number, decimals = 2): string {
@@ -384,6 +385,8 @@ export default function KriptoPage() {
           )}
         </motion.div>
       </div>
+
+      <FloatingChatButton pageFocus="kripto" />
     </main>
   );
 }

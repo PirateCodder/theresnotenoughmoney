@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { GlobeAltIcon, ChevronDownIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 import { useMarket } from "@/context/MarketContext";
 import PageHeader from "@/components/PageHeader";
+import FloatingChatButton from "@/components/FloatingChatButton";
 
 // ─── Emtia meta (sadece etiket, artık ikon yok) ───────────────────────
 const EMTIA_META: Record<string, { label: string }> = {
@@ -418,6 +419,8 @@ export default function EmtiaPage() {
           </motion.footer>
         </motion.div>
       </div>
+
+      <FloatingChatButton pageFocus="emtia" />
     </main>
   );
 }

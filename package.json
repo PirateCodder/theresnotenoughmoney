@@ -9,10 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.77",
+    "@ai-sdk/google": "^3.0.73",
+    "@ai-sdk/react": "^3.0.184",
     "@heroicons/react": "^2.2.0",
     "@radix-ui/react-select": "^2.0.0",
     "@radix-ui/react-slider": "^1.1.2",
     "@radix-ui/react-tooltip": "^1.0.7",
+    "ai": "^6.0.182",
     "clsx": "^2.1.1",
     "fast-xml-parser": "^5.8.0",
     "framer-motion": "^11.1.7",
@@ -21,7 +25,9 @@
     "next": "14.2.3",
     "react": "^18",
     "react-dom": "^18",
+    "react-markdown": "^10.1.0",
     "recharts": "^2.12.7",
+    "remark-gfm": "^4.0.1",
     "tailwind-merge": "^2.3.0"
   },
   "devDependencies": {

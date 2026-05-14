@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CurrencyDollarIcon, ArrowsRightLeftIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useMarket } from "@/context/MarketContext";
 import PageHeader from "@/components/PageHeader";
+import FloatingChatButton from "@/components/FloatingChatButton";
 
 // ─── Skeleton ────────────────────────────────────────────────────────
 function SkeletonRow() {
@@ -510,6 +511,8 @@ export default function DovizPage() {
           )}
         </motion.div>
       </div>
+
+      <FloatingChatButton pageFocus="doviz" />
     </main>
   );
 }
