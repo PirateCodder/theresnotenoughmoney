@@ -119,17 +119,19 @@ function TypingDots() {
   );
 }
 
-// ─── Tek mesaj balonu — sadece mount'ta animate eder ─────────────────
+// ─── Tek mesaj balonu ─────────────────────────────────────────────────
 function MessageBubble({
   msgId,
   isUser,
   textContent,
   tierAccent,
+  streaming,
 }: {
   msgId: string;
   isUser: boolean;
   textContent: string;
   tierAccent: { color: string; bg: string; border: string };
+  streaming?: boolean;
 }) {
   return (
     <motion.div
@@ -169,7 +171,10 @@ function MessageBubble({
         }
       >
         {isUser ? (
-          textContent
+          <span style={{ whiteSpace: "pre-wrap" }}>{textContent}</span>
+        ) : streaming ? (
+          /* Streaming sırasında düz text — ReactMarkdown flicker etmez */
+          <span style={{ whiteSpace: "pre-wrap" }}>{textContent}</span>
         ) : (
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
@@ -243,7 +248,9 @@ export default function ChatBot({ open, onClose, pageFocus }: ChatBotProps) {
     },
   });
 
-  const isLoading = status === "submitted" || status === "streaming";
+  const isWaiting = status === "submitted";
+  const isStreaming = status === "streaming";
+  const isLoading = isWaiting || isStreaming;
 
   // Tier değişince konuşmayı sıfırla
   const handleTierChange = useCallback((newTier: AiTier) => {
@@ -300,10 +307,10 @@ export default function ChatBot({ open, onClose, pageFocus }: ChatBotProps) {
           <motion.div
             className="fixed z-50 flex flex-col"
             style={{
-              bottom: "24px",
-              right: "24px",
-              width: "min(420px, calc(100vw - 32px))",
-              height: "min(600px, calc(100vh - 120px))",
+              bottom: "16px",
+              left: "16px",
+              right: "16px",
+              height: "min(600px, calc(100dvh - 100px))",
               background: "rgba(22,18,28,0.85)",
               backdropFilter: "blur(32px)",
               WebkitBackdropFilter: "blur(32px)",
@@ -451,7 +458,7 @@ export default function ChatBot({ open, onClose, pageFocus }: ChatBotProps) {
               )}
 
               {/* Mesajlar */}
-              {messages.map((msg) => {
+              {messages.map((msg, idx) => {
                 const isUser = msg.role === "user";
                 const textContent = (msg.parts ?? [])
                   .filter(
@@ -463,6 +470,8 @@ export default function ChatBot({ open, onClose, pageFocus }: ChatBotProps) {
 
                 if (!textContent) return null;
 
+                const isLastAssistant = !isUser && isStreaming && idx === messages.length - 1;
+
                 return (
                   <MessageBubble
                     key={msg.id}
@@ -470,12 +479,13 @@ export default function ChatBot({ open, onClose, pageFocus }: ChatBotProps) {
                     isUser={isUser}
                     textContent={textContent}
                     tierAccent={tierAccent}
+                    streaming={isLastAssistant}
                   />
                 );
               })}
 
-              {/* Yükleniyor */}
-              {isLoading && (
+              {/* Yükleniyor — sadece API cevap beklenirken */}
+              {isWaiting && (
                 <div className="flex justify-start">
                   <div className="flex-shrink-0 mt-0.5 mr-2">
                     <Image

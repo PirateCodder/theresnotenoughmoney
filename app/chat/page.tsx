@@ -11,6 +11,14 @@ import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import logoSrc from "@/app/logo.webp";
+import {
+  StarIcon,
+  CurrencyDollarIcon,
+  BoltIcon,
+  GlobeAltIcon,
+  ChartBarIcon,
+  ScaleIcon,
+} from "@heroicons/react/24/outline";
 
 // ─── Tipler ──────────────────────────────────────────────────────────
 type AiTier = "basic" | "pro";
@@ -19,8 +27,8 @@ type AiTier = "basic" | "pro";
 const TOPIC_CARDS = [
   {
     id: "altin",
-    label: "Altın & Değerli Madenler",
-    icon: "🪙",
+    label: "Altın & Madenler",
+    Icon: StarIcon,
     accent: "#D4AA60",
     accentBg: "rgba(212,170,96,0.12)",
     accentBorder: "rgba(212,170,96,0.3)",
@@ -28,8 +36,8 @@ const TOPIC_CARDS = [
   },
   {
     id: "doviz",
-    label: "Döviz & Kur Analizi",
-    icon: "💱",
+    label: "Döviz & Kur",
+    Icon: CurrencyDollarIcon,
     accent: "#8BAFC4",
     accentBg: "rgba(139,175,196,0.12)",
     accentBorder: "rgba(139,175,196,0.3)",
@@ -37,8 +45,8 @@ const TOPIC_CARDS = [
   },
   {
     id: "kripto",
-    label: "Kripto Para Piyasası",
-    icon: "₿",
+    label: "Kripto Para",
+    Icon: BoltIcon,
     accent: "#A89BC2",
     accentBg: "rgba(168,155,194,0.12)",
     accentBorder: "rgba(168,155,194,0.3)",
@@ -47,7 +55,7 @@ const TOPIC_CARDS = [
   {
     id: "emtia",
     label: "Emtia & Hammadde",
-    icon: "🛢️",
+    Icon: GlobeAltIcon,
     accent: "#7FBFA8",
     accentBg: "rgba(127,191,168,0.12)",
     accentBorder: "rgba(127,191,168,0.3)",
@@ -55,8 +63,8 @@ const TOPIC_CARDS = [
   },
   {
     id: "genel",
-    label: "Genel Piyasa Analizi",
-    icon: "📊",
+    label: "Genel Piyasa",
+    Icon: ChartBarIcon,
     accent: "#F4A384",
     accentBg: "rgba(244,163,132,0.12)",
     accentBorder: "rgba(244,163,132,0.3)",
@@ -64,8 +72,8 @@ const TOPIC_CARDS = [
   },
   {
     id: "karsilastir",
-    label: "Yatırım Karşılaştırması",
-    icon: "⚖️",
+    label: "Karşılaştır",
+    Icon: ScaleIcon,
     accent: "#C2606A",
     accentBg: "rgba(194,96,106,0.12)",
     accentBorder: "rgba(194,96,106,0.3)",
@@ -160,17 +168,19 @@ function TypingDots({ color }: { color: string }) {
   );
 }
 
-// ─── Tek mesaj balonu — sadece mount'ta animate eder ─────────────────
+// ─── Tek mesaj balonu ─────────────────────────────────────────────────
 function MessageBubble({
   msgId,
   isUser,
   textContent,
   tierAccent,
+  streaming,
 }: {
   msgId: string;
   isUser: boolean;
   textContent: string;
   tierAccent: { color: string; bg: string; border: string };
+  streaming?: boolean;
 }) {
   return (
     <motion.div
@@ -210,6 +220,9 @@ function MessageBubble({
         }
       >
         {isUser ? (
+          <span style={{ whiteSpace: "pre-wrap" }}>{textContent}</span>
+        ) : streaming ? (
+          /* Streaming sırasında düz text — ReactMarkdown flicker etmez */
           <span style={{ whiteSpace: "pre-wrap" }}>{textContent}</span>
         ) : (
           <ReactMarkdown
@@ -320,7 +333,9 @@ export default function ChatPage() {
     },
   });
 
-  const isLoading = status === "submitted" || status === "streaming";
+  const isWaiting = status === "submitted";          // API cevap bekliyor → dots
+  const isStreaming = status === "streaming";         // cevap geliyor → dots gizle
+  const isLoading = isWaiting || isStreaming;         // input disable için
   const hasMessages = messages.length > 0;
 
   const handleTierChange = useCallback(
@@ -340,6 +355,10 @@ export default function ChatPage() {
     const msg = inputValue.trim();
     if (!msg || isLoading) return;
     setInputValue("");
+    // Textarea yüksekliğini hemen sıfırla
+    if (inputRef.current) {
+      inputRef.current.style.height = "auto";
+    }
     sendMessage({ text: msg });
   }, [inputValue, isLoading, sendMessage]);
 
@@ -507,7 +526,6 @@ export default function ChatPage() {
                     >
                       {isSelected && (
                         <motion.div
-                          layoutId="topic-selected"
                           className="absolute top-2 right-2 w-4 h-4 rounded-full flex items-center justify-center"
                           style={{ background: card.accent }}
                           initial={{ scale: 0 }}
@@ -519,13 +537,20 @@ export default function ChatPage() {
                           </svg>
                         </motion.div>
                       )}
-                      <div className="text-xl mb-2">{card.icon}</div>
-                      <p
-                        className="text-[12.5px] font-semibold leading-snug"
-                        style={{ color: card.accent }}
-                      >
-                        {card.label}
-                      </p>
+                      <div className="flex items-center gap-2.5">
+                        <div
+                          className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
+                          style={{ background: card.accentBg, border: `1px solid ${card.accentBorder}` }}
+                        >
+                          <card.Icon className="w-4 h-4" style={{ color: card.accent }} />
+                        </div>
+                        <p
+                          className="text-[12.5px] font-semibold leading-snug"
+                          style={{ color: card.accent }}
+                        >
+                          {card.label}
+                        </p>
+                      </div>
                     </motion.button>
                   );
                 })}
@@ -536,7 +561,7 @@ export default function ChatPage() {
 
         {/* ── Mesajlar ── */}
         <div className="space-y-4">
-          {messages.map((msg) => {
+          {messages.map((msg, idx) => {
             const isUser = msg.role === "user";
             const textContent = (msg.parts ?? [])
               .filter(
@@ -548,6 +573,9 @@ export default function ChatPage() {
 
             if (!textContent) return null;
 
+            // Streaming sırasında son asistan mesajı düz text olarak gösterilir
+            const isLastAssistant = !isUser && isStreaming && idx === messages.length - 1;
+
             return (
               <MessageBubble
                 key={msg.id}
@@ -555,12 +583,13 @@ export default function ChatPage() {
                 isUser={isUser}
                 textContent={textContent}
                 tierAccent={tierAccent}
+                streaming={isLastAssistant}
               />
             );
           })}
 
-          {/* Yükleniyor */}
-          {isLoading && (
+          {/* Yükleniyor — sadece submitted (API cevap vermedi) durumunda */}
+          {isWaiting && (
             <motion.div
               className="flex gap-3 justify-start"
               initial={{ opacity: 0, y: 8 }}

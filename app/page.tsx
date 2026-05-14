@@ -5,11 +5,12 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  CalculatorIcon,
-  ArrowTrendingUpIcon,
-  SparklesIcon,
-  CpuChipIcon,
-  ChartBarSquareIcon,
+  BanknotesIcon,
+  CurrencyDollarIcon,
+  StarIcon,
+  BoltIcon,
+  GlobeAltIcon,
+  ChatBubbleLeftRightIcon,
 } from "@heroicons/react/24/outline";
 import logoBig from "./logo big.webp";
 
@@ -18,8 +19,8 @@ const CARDS = [
   {
     href: "/kredi",
     label: "Kredi Simülasyonu",
-    description: "Aylık taksit, toplam maliyet ve amortisman planını hesapla",
-    Icon: CalculatorIcon,
+    description: "Aylık taksit ve maliyet hesapları",
+    Icon: BanknotesIcon,
     accent: "#F4A384",
     accentBg: "rgba(244,163,132,0.12)",
     accentBorder: "rgba(244,163,132,0.25)",
@@ -28,8 +29,8 @@ const CARDS = [
   {
     href: "/doviz",
     label: "Döviz Kurları",
-    description: "Anlık kurları takip et, hızlıca dönüştür",
-    Icon: ArrowTrendingUpIcon,
+    description: "Anlık kurları takip et, kurları dönüştür",
+    Icon: CurrencyDollarIcon,
     accent: "#8BAFC4",
     accentBg: "rgba(139,175,196,0.12)",
     accentBorder: "rgba(139,175,196,0.25)",
@@ -38,8 +39,8 @@ const CARDS = [
   {
     href: "/altin",
     label: "Altın & Değerli Madenler",
-    description: "Gram altın, çeyrek, gümüş ve tüm kıymetli madenleri izle",
-    Icon: SparklesIcon,
+    description: "Altın ve değerli maden değerleri",
+    Icon: StarIcon,
     accent: "#D4AA60",
     accentBg: "rgba(212,170,96,0.12)",
     accentBorder: "rgba(212,170,96,0.25)",
@@ -48,8 +49,8 @@ const CARDS = [
   {
     href: "/kripto",
     label: "Kripto Para Piyasası",
-    description: "BTC, ETH ve yüzlerce kripto paranın güncel fiyatları",
-    Icon: CpuChipIcon,
+    description: "Anlık kripto para piyasası takibi",
+    Icon: BoltIcon,
     accent: "#A89BC2",
     accentBg: "rgba(168,155,194,0.12)",
     accentBorder: "rgba(168,155,194,0.25)",
@@ -58,8 +59,8 @@ const CARDS = [
   {
     href: "/emtia",
     label: "Emtia Fiyatları",
-    description: "Ham petrol, doğal gaz, platin ve küresel emtia endeksleri",
-    Icon: ChartBarSquareIcon,
+    description: "Ham petrol, doğal gaz ve emtia fiyatları",
+    Icon: GlobeAltIcon,
     accent: "#7FBFA8",
     accentBg: "rgba(127,191,168,0.12)",
     accentBorder: "rgba(127,191,168,0.25)",
@@ -126,7 +127,7 @@ function NavCard({ href, label, description, Icon, accent, accentBg, accentBorde
               <p className="font-semibold text-[15px] leading-snug tracking-tight" style={{ color: "#FAEFE9" }}>
                 {label}
               </p>
-              <p className="text-[12.5px] leading-snug mt-0.5 truncate" style={{ color: "rgba(226,213,194,0.48)" }}>
+              <p className="text-[12.5px] leading-snug mt-0.5" style={{ color: "rgba(226,213,194,0.48)" }}>
                 {description}
               </p>
             </div>
@@ -191,24 +192,12 @@ export default function Home() {
           </p>
         </motion.div>
 
-        {/* ── Kartlar ── */}
+        {/* ── Yapay Zeka CTA Kartı — en üstte ── */}
         <motion.div
-          className="flex flex-col gap-3"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {CARDS.map((card) => (
-            <NavCard key={card.href} {...card} />
-          ))}
-        </motion.div>
-
-        {/* ── Yapay Zeka CTA Kartı — /chat sayfasına yönlendirir ── */}
-        <motion.div
-          className="mt-4"
+          className="mb-3"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, duration: 0.5, ease: "easeOut" }}
+          transition={{ delay: 0.2, duration: 0.45, ease: "easeOut" }}
         >
           <Link href="/chat" className="block">
             <motion.div
@@ -227,12 +216,12 @@ export default function Home() {
               }}
               whileTap={{ scale: 0.985 }}
             >
-              {/* Arka plan gradient ışıltı */}
+              {/* Arka plan gradient */}
               <div
                 className="absolute inset-0 opacity-60 pointer-events-none"
                 style={{ background: "linear-gradient(135deg, rgba(244,163,132,0.12) 0%, rgba(168,155,194,0.12) 50%, rgba(72,109,131,0.08) 100%)" }}
               />
-              {/* Animasyonlu ışıltı efekti */}
+              {/* Animasyonlu ışıltı */}
               <motion.div
                 className="absolute inset-0 pointer-events-none"
                 style={{ background: "linear-gradient(90deg, transparent 0%, rgba(244,163,132,0.08) 50%, transparent 100%)" }}
@@ -244,14 +233,14 @@ export default function Home() {
                 {/* İkon */}
                 <div className="flex-shrink-0 relative">
                   <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center text-xl"
+                    className="w-11 h-11 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
                     style={{
-                      background: "linear-gradient(135deg, rgba(244,163,132,0.25) 0%, rgba(168,155,194,0.2) 100%)",
+                      background: "linear-gradient(135deg, rgba(244,163,132,0.2) 0%, rgba(168,155,194,0.15) 100%)",
                       border: "1px solid rgba(244,163,132,0.35)",
-                      boxShadow: "0 0 20px rgba(244,163,132,0.2)",
+                      boxShadow: "0 0 16px rgba(244,163,132,0.18)",
                     }}
                   >
-                    🤖
+                    <ChatBubbleLeftRightIcon className="w-[22px] h-[22px]" style={{ color: "#F4A384" }} />
                   </div>
                   <motion.div
                     className="absolute inset-0 rounded-xl"
@@ -262,33 +251,20 @@ export default function Home() {
                 </div>
 
                 {/* Metin */}
-                <div className="flex-1 min-w-0 text-left">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <p
-                      className="font-bold text-[15px] leading-snug tracking-tight bg-clip-text text-transparent"
-                      style={{ backgroundImage: "linear-gradient(90deg, #F4A384, #C2606A, #A89BC2)" }}
-                    >
-                      Yapay Zeka Asistanı
-                    </p>
-                    <span
-                      className="text-[9px] font-bold px-1.5 py-0.5 rounded-md flex-shrink-0"
-                      style={{
-                        background: "rgba(244,163,132,0.2)",
-                        border: "1px solid rgba(244,163,132,0.4)",
-                        color: "#F4A384",
-                        letterSpacing: "0.05em",
-                      }}
-                    >
-                      YENİ
-                    </span>
-                  </div>
-                  <p className="text-[12px] leading-snug" style={{ color: "rgba(226,213,194,0.45)" }}>
-                    Gemini & Claude ile piyasa analizi · Konu seç, soru sor
+                <div className="flex-1 min-w-0">
+                  <p
+                    className="font-bold text-[15px] leading-snug tracking-tight bg-clip-text text-transparent"
+                    style={{ backgroundImage: "linear-gradient(90deg, #F4A384, #C2606A, #A89BC2)" }}
+                  >
+                    Finans Kedisi
+                  </p>
+                  <p className="text-[12.5px] leading-snug mt-0.5" style={{ color: "rgba(226,213,194,0.45)" }}>
+                    Yapay zeka ile analiz etme
                   </p>
                 </div>
 
                 {/* Sağ ok */}
-                <div className="flex-shrink-0 opacity-60 group-hover:opacity-100 transition-opacity duration-200 group-hover:translate-x-0.5">
+                <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:translate-x-0.5">
                   <svg className="w-4 h-4" style={{ color: "#F4A384" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
@@ -301,6 +277,18 @@ export default function Home() {
               />
             </motion.div>
           </Link>
+        </motion.div>
+
+        {/* ── Kartlar ── */}
+        <motion.div
+          className="flex flex-col gap-3"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {CARDS.map((card) => (
+            <NavCard key={card.href} {...card} />
+          ))}
         </motion.div>
 
         {/* ── Footer ── */}
