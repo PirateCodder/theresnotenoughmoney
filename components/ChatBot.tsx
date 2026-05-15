@@ -12,6 +12,9 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import logoSrc from "@/app/logo.webp";
 
+// ─── Pro modu açmak için bu sabiti true yap ───────────────────────────
+const PRO_ENABLED = false;
+
 // ─── Tipler ──────────────────────────────────────────────────────────
 type AiTier = "basic" | "pro";
 
@@ -272,10 +275,11 @@ export default function ChatBot({ open, onClose, pageFocus }: ChatBotProps) {
 
   const handleSend = useCallback(() => {
     const text = inputValue.trim();
-    if (!text || isLoading) return;
+    // Pro modu kapalıysa API'ye kesinlikle istek gönderme
+    if (!text || isLoading || (tier === "pro" && !PRO_ENABLED)) return;
     setInputValue("");
     sendMessage({ text });
-  }, [inputValue, isLoading, sendMessage]);
+  }, [inputValue, isLoading, tier, sendMessage]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -425,7 +429,43 @@ export default function ChatBot({ open, onClose, pageFocus }: ChatBotProps) {
               </div>
             </div>
 
+            {/* ── Pro Kapalı Ekranı ── */}
+            {tier === "pro" && !PRO_ENABLED && (
+              <motion.div
+                className="flex-1 flex flex-col items-center justify-center px-6 text-center gap-4"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+              >
+                <div
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl"
+                  style={{ background: "rgba(168,155,194,0.15)", border: "1px solid rgba(168,155,194,0.25)" }}
+                >
+                  🔬
+                </div>
+                <div>
+                  <p className="font-semibold text-[15px] mb-1.5" style={{ color: "#A89BC2" }}>
+                    Pro Modu Yakında
+                  </p>
+                  <p className="text-[12.5px] leading-relaxed max-w-[260px]" style={{ color: "rgba(226,213,194,0.45)" }}>
+                    Sizin için geliştirmelere devam ediyoruz. Pro özellikleri hazır olduğunda burada olacak! 🚀
+                  </p>
+                </div>
+                <div
+                  className="px-4 py-2 rounded-xl text-[11.5px] font-medium"
+                  style={{
+                    background: "rgba(168,155,194,0.1)",
+                    border: "1px solid rgba(168,155,194,0.2)",
+                    color: "rgba(168,155,194,0.6)",
+                  }}
+                >
+                  Basic modunu kullanmaya devam edebilirsin ✨
+                </div>
+              </motion.div>
+            )}
+
             {/* ── Mesajlar ── */}
+            {!(tier === "pro" && !PRO_ENABLED) && (
             <div
               className="flex-1 overflow-y-auto px-4 py-4 space-y-3"
               style={{
@@ -525,6 +565,7 @@ export default function ChatBot({ open, onClose, pageFocus }: ChatBotProps) {
 
               <div ref={messagesEndRef} />
             </div>
+            )}
 
             {/* ── Input Alanı ── */}
             <div
@@ -537,31 +578,42 @@ export default function ChatBot({ open, onClose, pageFocus }: ChatBotProps) {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Piyasa hakkında soru sor..."
-                  disabled={isLoading}
+                  placeholder={
+                    tier === "pro" && !PRO_ENABLED
+                      ? "Pro modu yakında geliyor..."
+                      : "Piyasa hakkında soru sor..."
+                  }
+                  disabled={isLoading || (tier === "pro" && !PRO_ENABLED)}
                   className="flex-1 px-4 py-2.5 rounded-xl text-[13px] outline-none transition-all"
                   style={{
                     background: "rgba(255,255,255,0.06)",
                     border: `1px solid ${
-                      inputValue ? tierAccent.border : "rgba(255,255,255,0.08)"
+                      inputValue && !(tier === "pro" && !PRO_ENABLED)
+                        ? tierAccent.border
+                        : "rgba(255,255,255,0.08)"
                     }`,
-                    color: "#FAEFE9",
+                    color: tier === "pro" && !PRO_ENABLED ? "rgba(226,213,194,0.25)" : "#FAEFE9",
                     caretColor: tierAccent.color,
+                    cursor: tier === "pro" && !PRO_ENABLED ? "not-allowed" : "text",
                   }}
                 />
                 <motion.button
                   onClick={handleSend}
-                  disabled={!inputValue.trim() || isLoading}
+                  disabled={!inputValue.trim() || isLoading || (tier === "pro" && !PRO_ENABLED)}
                   className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                   style={{
                     background:
-                      inputValue.trim() && !isLoading
+                      inputValue.trim() && !isLoading && !(tier === "pro" && !PRO_ENABLED)
                         ? `linear-gradient(135deg, ${tierAccent.color}, ${
                             tier === "pro" ? "#8B7BAA" : "#C2606A"
                           })`
                         : "rgba(255,255,255,0.07)",
-                    opacity: !inputValue.trim() || isLoading ? 0.4 : 1,
+                    opacity:
+                      !inputValue.trim() || isLoading || (tier === "pro" && !PRO_ENABLED)
+                        ? 0.4
+                        : 1,
                     border: "none",
+                    cursor: tier === "pro" && !PRO_ENABLED ? "not-allowed" : "pointer",
                   }}
                   whileTap={{ scale: 0.92 }}
                   whileHover={{ scale: 1.05 }}
