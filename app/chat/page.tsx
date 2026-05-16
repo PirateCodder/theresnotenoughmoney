@@ -21,7 +21,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 // ─── Pro modu açmak için bu sabiti true yap ───────────────────────────
-const PRO_ENABLED = false;
+const PRO_ENABLED = true;
 
 // ─── Tipler ──────────────────────────────────────────────────────────
 type AiTier = "basic" | "pro";
