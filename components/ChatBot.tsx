@@ -13,7 +13,7 @@ import remarkGfm from "remark-gfm";
 import logoSrc from "@/app/logo.webp";
 
 // ─── Pro modu açmak için bu sabiti true yap ───────────────────────────
-const PRO_ENABLED = true;
+const PRO_ENABLED = false;
 
 // ─── Tipler ──────────────────────────────────────────────────────────
 type AiTier = "basic" | "pro";
